@@ -30,3 +30,5 @@ Route::middleware('auth')->group(function () {
     Route::resource('meetings', MeetingController::class);
     Route::post('meetings/{meeting}/join', JoinMeetingController::class);
 });
+
+Route::view('broadcast', 'broadcast');
