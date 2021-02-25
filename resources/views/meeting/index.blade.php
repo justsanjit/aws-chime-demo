@@ -1,4 +1,13 @@
 <table>
+    @if($message = session('message'))
+        <h2>{{ $message }}</h2>
+    @endif
+    <br>
+    <form action="/meetings" method="post">
+        @csrf
+        <input type="submit" value="Create Meeting" />
+    </form>
+    <br>
     @foreach($meetings as $meeting)
     <tr>
         <td>{{ $meeting->id }}</td>

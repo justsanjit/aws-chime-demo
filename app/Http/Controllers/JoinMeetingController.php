@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Meeting;
 use Aws\Chime\ChimeClient;
+use Aws\Chime\Exception\ChimeException;
 use Aws\Credentials\Credentials;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -25,10 +26,16 @@ class JoinMeetingController extends Controller
             'version' => 'latest',
         ]);
     
-        $result = $chime->createAttendee([
-            'ExternalUserId' => 'user-'.Auth::id(),
-            'MeetingId' => $meeting->meeting_id
-        ]);
+        try {
+            $result = $chime->createAttendee([
+                'ExternalUserId' => 'user-'.Auth::id(),
+                'MeetingId' => $meeting->meeting_id
+            ]);
+        } catch (ChimeException $e) {
+            if ($e->getAwsErrorCode() === 'NotFoundException') {
+                return back()->with('message', 'Meeting not found. Try to create new meeting.');
+            }
+        }
 
         session()->put('meeting-'.$meeting->id, $result->toArray());
 

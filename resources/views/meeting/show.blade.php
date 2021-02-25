@@ -6,17 +6,49 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    <div class="grid grid-cols-2">
+                    <div class="grid grid-cols-5">
                         <div>
                             <video id="local-video"></video>
                             Local Video
                         </div>
                         <div>
-                            <video id="remote-video"></video>
-                            Remote video
+                            <video id="video-1"></video>
+                            Tile 1
+                        </div>
+                        <div>
+                            <video id="video-2"></video>
+                            Tile 2
+                        </div>
+                        <div>
+                            <video id="video-3"></video>
+                            Tile 3
+                        </div>
+                        <div>
+                            <video id="video-4"></video>
+                            Tile 4
+                        </div>
+                        <div>
+                            <video id="video-5"></video>
+                            Tile 5
+                        </div>
+                        <div>
+                            <video id="video-6"></video>
+                            Tile 6
+                        </div>
+                        <div>
+                            <video id="video-7"></video>
+                            Tile 7
+                        </div>
+                        <div>
+                            <video id="video-8"></video>
+                            Tile 8
+                        </div>
+                        <div>
+                            <video id="video-9"></video>
+                            Tile 9
                         </div>
                     </div>
                     <audio id="audio"></audio>
@@ -50,6 +82,47 @@
                             return document.getElementById(id);
                         }
 
+                        const videoElements = [
+                            domElement('video-1'),
+                            domElement('video-2'),
+                            domElement('video-3'),
+                            domElement('video-4'),
+                            domElement('video-5'),
+                            domElement('video-6'),
+                            domElement('video-7'),
+                            domElement('video-8'),
+                            domElement('video-9'),
+                        ];
+
+                        // index-tileId pairs
+                        const indexMap = {};
+
+                        const acquireVideoElement = tileId => {
+                        // Return the same video element if already bound.
+                        for (let i = 0; i < 9; i += 1) {
+                            if (indexMap[i] === tileId) {
+                                return videoElements[i];
+                            }
+                        }
+                        // Return the next available video element.
+                        for (let i = 0; i < 9; i += 1) {
+                            if (!indexMap.hasOwnProperty(i)) {
+                            indexMap[i] = tileId;
+                            return videoElements[i];
+                            }
+                        }
+                        throw new Error('no video element is available');
+                        };
+
+                        const releaseVideoElement = tileId => {
+                        for (let i = 0; i < 9; i += 1) {
+                            if (indexMap[i] === tileId) {
+                                delete indexMap[i];
+                                return;
+                                }
+                            }
+                        };
+
                         const observer = {
                             audioVideoDidStart: () => {
                                 console.log('Started');
@@ -66,14 +139,30 @@
                                 }
                             }
                             , videoTileDidUpdate: tileState => {
-                                const videoElement = tileState.localTile ? 'local-video' : 'remote-video'
 
-                                meetingSession.audioVideo.bindVideoElement(tileState.tileId, domElement(videoElement));
+                                if (tileState.localTile) {
+                                    meetingSession.audioVideo.bindVideoElement(tileState.tileId, domElement('local-video'));
+                                    reutrn;
+                                }
+
+                                // Ignore a tile without attendee ID, a local tile (your video), and a content share.
+                                if (!tileState.boundAttendeeId || tileState.isContent) {
+                                    return;
+                                }
+
+                                meetingSession.audioVideo.bindVideoElement(
+                                    tileState.tileId,
+                                    acquireVideoElement(tileState.tileId)
+                                );
+                            },
+                            videoTileWasRemoved: tileId => {
+                                releaseVideoElement(tileId);
                             }
                         };
 
                         meetingSession.audioVideo.addObserver(observer);
-
+                        
+             
 
 
                         (async () => {
