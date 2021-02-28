@@ -58,7 +58,7 @@
                         }
                         , videoTileDidUpdate: tileState => {
                             // Ignore a tile without attendee ID, a local tile (your video), and a content share.
-                            if (!tileState.boundAttendeeId || tileState.isContent) {
+                            if (tileState.localTile || !tileState.boundAttendeeId || tileState.isContent) {
                                 return;
                             }
 
