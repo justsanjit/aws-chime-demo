@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\JoinMeetingController;
 use App\Http\Controllers\MeetingController;
-use App\Models\Meeting;
+use App\Http\Controllers\BroadcastController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,4 +31,4 @@ Route::middleware('auth')->group(function () {
     Route::post('meetings/{meeting}/join', JoinMeetingController::class);
 });
 
-Route::view('broadcast', 'broadcast');
+Route::get('broadcast/{meeting}', BroadcastController::class);
